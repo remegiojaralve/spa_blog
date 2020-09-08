@@ -89,27 +89,74 @@ const actions = {
       })
   },
   async addPost (context, payload) {
-    const data = JSON.stringify({
-      query: `mutation {\n  addPost(\n post: {\n title: "${payload.title}",\n content: "${payload.content}",\n image: "${payload.image}"\n }\n ) {\n id, title, content\n  }\n}`,
-      variables: {}
+    return new Promise((resolve) => {
+      const data = JSON.stringify({
+        query: `mutation {\n  addPost(\n post: {\n title: "${payload.title}",\n content: "${payload.content}",\n image: "${payload.image}"\n }\n ) {\n id, title, content, image\n  }\n}`,
+        variables: {}
+      })
+      const config = {
+        method: 'post',
+        url: 'http://localhost:4000/',
+        headers: {
+          Authorization: localStorage.getItem('authenticate'),
+          'Content-Type': 'application/json'
+        },
+        data: data
+      }
+      axios(config)
+        .then(function (response) {
+          console.log(response.data.data)
+          resolve(response.data.data)
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
     })
-    const config = {
-      method: 'post',
-      url: 'http://localhost:4000/',
-      headers: {
-        'authenticate': localStorage.getItem('authenticate').value, // eslint-disable-line quote-props
-        'Content-Type': 'application/json'
-      },
-      data: data
-    }
-    axios(config)
-      .then(function (response) {
-        console.log(JSON.stringify(response.data))
-        context.commit('newPost', response.data.payload)
+  },
+  async addComment (context, payload) {
+    return new Promise((resolve) => {
+      const data = JSON.stringify({
+        query: `mutation {\n addComment(\n postId: ${payload.id},\n content: "${payload.content}"\n ) {\n id,\n postId,\n content,\n createdAt\n }\n}`,
+        variables: {}
       })
-      .catch(function (error) {
-        console.log(error)
+      const config = {
+        method: 'post',
+        url: 'http://localhost:4000/',
+        headers: {
+          Authorization: localStorage.getItem('authenticate'),
+          'Content-Type': 'application/json'
+        },
+        data: data
+      }
+      axios(config)
+        .then(function (response) {
+          resolve(response.data.data)
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+    })
+  },
+  async updatePost ({ commit }, payload) {
+    return new Promise((resolve) => {
+      const data = JSON.stringify({
+        query: `mutation {\n updatePost(\n post: {\n title: "${payload.title}",\n id: ${payload.id},\n image: "${payload.image}",\n content: "${payload.content}"\n }\n ) {\n id\n }\n}`,
+        variables: {}
       })
+      const config = {
+        method: 'post',
+        url: 'http://localhost:4000/',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: localStorage.getItem('authenticate')
+        },
+        data: data
+      }
+      axios(config).then((response) => {
+        console.log(response)
+        resolve(response)
+      })
+    })
   }
 }
 
@@ -118,16 +165,7 @@ const mutations = {
   setPosts: (state, postList) => (state.postList = postList),
   setLatestPosts: (state, latestPosts) => (state.latestPosts = latestPosts),
   singlePost: (state, singlePost) => (state.singlePost = singlePost),
-  setLoadMorePosts: (state, loadMorePosts) => (state.loadMorePosts = loadMorePosts),
-  newPost: (state, payload) => {
-    const newPost = {
-      title: payload.title,
-      content: payload.content,
-      image: payload.image
-    }
-    state.postList.push(newPost)
-    console.log(state.postList.length)
-  }
+  setLoadMorePosts: (state, loadMorePosts) => (state.loadMorePosts = loadMorePosts)
 }
 
 export default {

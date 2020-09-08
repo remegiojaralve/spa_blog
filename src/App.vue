@@ -157,4 +157,34 @@ html {
   from {opacity: .4}
   to {opacity: 1}
 }
+
+.post-input-comment-container {
+  text-align: right;
+  margin-top: 40px;
+}
+
+.post-input-comment {
+  width: 100%;
+  height: 200px;
+  padding: 20px;
+  color: black;
+  outline: none;
+  border: 1px solid black;
+  font-style: italic;
+  font-family: Arial, Helvetica, sans-serif;
+  letter-spacing: 0.1em;
+}
+
+.post-input-comment-submit {
+  width: 200px;
+  padding: 20px;
+  background-color: black;
+  color: white;
+  font-weight: bold;
+  font-size: 20px;
+  outline: none;
+  border: 0;
+  cursor: pointer;
+  margin-top: 30px;
+}
 </style>

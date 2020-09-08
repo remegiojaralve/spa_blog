@@ -2,7 +2,7 @@
   <div class="create-post">
     <Breadcrumbs linkTitle="Create New Post" />
     <div class="container">
-      <form>
+      <form enctype="multipart/form-data" id="createPost">
         <div class="create-post-buttons">
           <span @click="onSubmit">Save Post</span>
           <router-link to="/">Cancel</router-link>
@@ -12,7 +12,9 @@
           <textarea v-model="newPost.title" placeholder="Title" :class="!$v.newPost.title.required && $v.newPost.title.$dirty ? 'error' : ''"></textarea>
         </div>
         <div class="create-post-image">
-          <p>UPLOAD IMAGE</p>
+          <img v-if="newPost.image" :src="newPost.image" />
+          <input type="file" @change="onFileSelect" ref="fileImage">
+          <button @click.prevent="$refs.fileImage.click()">UPLOAD IMAGE</button>
         </div>
         <textarea class="create-post-content" :class="!$v.newPost.content.required && $v.newPost.content.$dirty ? 'error' : ''" v-model="newPost.content" placeholder="Content"></textarea>
       </form>
@@ -32,7 +34,9 @@ export default {
   },
   data () {
     return {
+      url: null,
       newPost: {
+        formId: document.querySelector('#createPost'),
         date: new Date(),
         title: '',
         image: '',
@@ -56,12 +60,25 @@ export default {
       this.$v.newPost.$touch()
       if (!this.$v.newPost.$invalid) {
         this.addPost(this.newPost)
-        alert('Post added!')
+          .then(res => {
+            this.$router.push({ path: `/posts/${res.addPost.id}` })
+          })
         this.newPost = {
           title: '',
           image: '',
           content: ''
         }
+      }
+    },
+    onFileSelect (e) {
+      console.log(e)
+      const file = e.target.files[0]
+      const reader = new FileReader()
+      if (file) {
+        reader.readAsDataURL(file)
+      }
+      reader.onloadend = () => {
+        this.newPost.image = reader.result
       }
     }
   }
@@ -123,8 +140,18 @@ export default {
     background-color: #D6D6D6;
     position: relative;
     margin-top: 25px;
+    z-index: 1;
+    overflow: hidden;
 
-    p {
+    input {
+      display: none;
+    }
+
+    img {
+      width: 100%;
+    }
+
+    button {
       font-size: 20px;
       font-weight: bold;
       letter-spacing: 0.1em;
@@ -135,6 +162,9 @@ export default {
       width: 260px;
       bottom: 0;
       left: 0;
+      z-index: 2;
+      cursor: pointer;
+      outline: none;
     }
   }
 

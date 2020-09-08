@@ -12,7 +12,7 @@ const actions = {
   loginUser ({ commit }, payload) {
     return new Promise((resolve) => {
       const data = JSON.stringify({
-        query: `mutation {\n  authenticate(\n    email: "${payload.email}",\n    password: "${payload.password}"\n  )\n}`,
+        query: `mutation {\n  authenticate(\n    email: "${payload.logEmail}",\n    password: "${payload.logPassword}"\n  )\n}`,
         variables: {}
       })
       const config = {
@@ -25,11 +25,12 @@ const actions = {
       }
       axios(config)
         .then(function (response) {
-          console.log(JSON.stringify(response.data))
           const key = response.data.data.authenticate
-          localStorage.setItem('authenticate', key)
-          commit('setAuthKey', key)
-          resolve(response)
+          if (key.length !== 0) {
+            localStorage.setItem('authenticate', key)
+            commit('setAuthKey', key)
+          }
+          resolve(key)
         })
     })
   },
@@ -57,7 +58,7 @@ const actions = {
   registerUser ({ commit }, payload) {
     return new Promise((resolve, reject) => {
       const data = JSON.stringify({
-        query: `mutation {\n  register(\n    email: "${payload.email}",\n    password: "${payload.password}"\n  )\n}`,
+        query: `mutation {\n  register(\n    email: "${payload.regEmail}",\n    password: "${payload.regPassword}"\n  )\n}`,
         variables: {}
       })
       const config = {
@@ -70,8 +71,8 @@ const actions = {
       }
       axios(config)
         .then(function (response) {
-          console.log(JSON.stringify(response.data))
-          resolve(response)
+          console.log(response.data.data)
+          resolve(response.data.data.register)
         })
         .catch(function (error) {
           console.log(error)

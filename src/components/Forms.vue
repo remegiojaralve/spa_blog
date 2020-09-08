@@ -5,6 +5,7 @@
       <div v-show="showLogin" class="forms-input-container fade">
         <form @submit.prevent="logIn">
           <div class="forms-input">
+            <span v-if="loginError" class="form-error fade">Wrong email/password</span><br>
             <label>Email</label><br>
             <input type="email" v-model="loginInfo.logEmail">
             <span v-if="!$v.loginInfo.logEmail.required && $v.loginInfo.logEmail.$dirty" class="form-error fade">Email is required!</span>
@@ -24,14 +25,15 @@
           <div class="forms-input">
             <label>Email</label><br>
             <input type="email" v-model="registerData.regEmail">
-            <span v-if="!$v.registerData.regEmail.required && $v.registerData.regEmail.$dirty" class="form-error fade">Email is required!</span>
-            <span v-if="!$v.registerData.regEmail.email && $v.registerData.regEmail.$dirty" class="form-error fade">Invalid email.</span>
+            <span v-if="isRegistered === false" class="form-error fade">Email already exist!</span>
+            <span v-if="!$v.registerData.regEmail.required && $v.registerData.regEmail.$dirty && isRegistered" class="form-error fade">Email is required!</span>
+            <span v-if="!$v.registerData.regEmail.email && $v.registerData.regEmail.$dirty && isRegistered" class="form-error fade">Invalid email.</span>
           </div>
           <div class="forms-input">
             <label>Password</label><br>
             <input type="password" v-model="registerData.regPassword">
-            <span v-if="!$v.registerData.regPassword.required && $v.registerData.regPassword.$dirty" class="form-error fade">Password is required!</span>
-            <span v-if="!$v.registerData.regPassword.minLength && $v.registerData.regPassword.$dirty" class="form-error fade"> {{$v.registerData.regPassword.$params.minLength.min}} characters minimum! </span>
+            <span v-if="!$v.registerData.regPassword.required && $v.registerData.regPassword.$dirty && isRegistered" class="form-error fade">Password is required!</span>
+            <span v-if="!$v.registerData.regPassword.minLength && $v.registerData.regPassword.$dirty && isRegistered" class="form-error fade"> {{$v.registerData.regPassword.$params.minLength.min}} characters minimum! </span>
           </div>
           <div class="forms-input">
             <label>Confirm Password</label><br>
@@ -59,6 +61,8 @@ export default {
     return {
       formHeading: 'LOGIN',
       showLogin: true,
+      loginError: false,
+      isRegistered: true,
       showRegister: false,
       loginInfo: {
         logEmail: '',
@@ -102,19 +106,16 @@ export default {
     ...mapActions(['loginUser', 'registerUser']),
     logIn () {
       this.$v.loginInfo.$touch()
-      if (this.$v.loginInfo.$invalid) {
-        console.log('Something wrong')
-      } else {
-        console.log('Succes form!')
+      if (!this.$v.loginInfo.$invalid) {
         this.loginUser(this.loginInfo)
           .then(res => {
-            console.log(res)
-            this.hideForm()
+            if (res.length > 0) {
+              this.hideForm()
+              this.clearFields()
+            } else {
+              this.loginError = true
+            }
           })
-        this.loginInfo = {
-          logEmail: '',
-          logPassword: ''
-        }
       }
     },
     register () {
@@ -128,8 +129,13 @@ export default {
         console.log('Something wrong')
       } else {
         this.registerUser(payload)
-          .then(() => {
-            this.toggleForms()
+          .then((res) => {
+            if (res === true) {
+              this.toggleForms()
+              this.isRegistered = true
+            } else {
+              this.isRegistered = false
+            }
           })
         this.registerData = {
           regEmail: '',

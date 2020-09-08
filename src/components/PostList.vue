@@ -97,6 +97,11 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
+
+    img {
+      width: auto;
+      height: 100%;
+    }
   }
 
   ul {

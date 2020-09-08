@@ -1,7 +1,7 @@
 <template>
   <div id="slider" class="slideshow-container">
     <div v-show="slideIndex === index" class="mySlides fade" v-for="(slides, index) in allLatestPosts" :key="index">
-      <img alt="Slide" :src="slides.image === null ? noImage : slides.image" :class="slides.image === null ? 'no-image' : ''">
+      <img alt="Slide" :src="slides.image.length < 1 ? noImage : slides.image" :class="slides.image.length < 1 ? 'no-image' : ''">
       <router-link class="post-link" :to="`/posts/${slides.id}`">
         <div class="slide-content">
           <h3>{{slides.title}}</h3>
@@ -69,6 +69,7 @@ export default {
 
 img {
   width: 100%;
+  opacity: 0.7;
 }
 
 .no-image {
@@ -88,7 +89,7 @@ img {
     font-size: 60px;
     color: white;
     position: relative;
-    word-break: break-all;
+    word-break: break-word;
     background-color: black;
     line-height: 1.5;
     box-shadow: -5px 0 black;

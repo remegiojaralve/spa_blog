@@ -2,8 +2,10 @@
   <div class="post-detail">
     <Breadcrumbs :linkTitle="postDetail.title" />
     <div class="container post-detail-contents">
-      <p class="post-detail-date" v-show="postDetail.createdAt !== null">{{postDetail.createdAt | formatDate}}</p>
-      <p v-show="isLogined">EDIT POST</p>
+      <div class="post-detail-container">
+        <p class="post-detail-date" v-show="postDetail.createdAt !== null">{{postDetail.createdAt | formatDate}}</p>
+        <p v-show="isLogined" class="post-detail-edit"><router-link :to="`/posts/${postDetail.id}/update`">EDIT POST</router-link></p>
+      </div>
       <h3 class="post-detail-title"> {{ postDetail.title }} </h3>
       <div class="post-detail-image">
         <img :src="postDetail.image === null ? noImage : postDetail.image" :alt="postDetail.title" />
@@ -15,7 +17,12 @@
         <p class="post-detail-comments-description"> {{comment.content}} </p>
         <p class="post-detail-comments-date"> {{comment.createdAt | formatDate}} </p>
       </div>
-      <div v-show="isLogined">Add Comment</div>
+      <div class="post-input-comment-container" v-show="isLogined">
+        <form @submit.prevent="onSubmitComment">
+          <textarea v-model="addCommentData.content" placeholder="Write comment" class="post-input-comment"></textarea>
+          <input class="post-input-comment-submit" type="submit" value="Submit">
+        </form>
+      </div>
     </div>
   </div>
 </template>
@@ -41,14 +48,29 @@ export default {
     return {
       id: this.$route.params.id,
       post: '',
-      noImage: require('@/assets/noimage.png')
+      noImage: require('@/assets/noimage.png'),
+      addCommentData: {
+        id: null,
+        content: ''
+      }
     }
   },
   mounted () {
     this.fetchSinglePost(this.id)
+    this.addCommentData.id = this.id
   },
   methods: {
-    ...mapActions(['fetchSinglePost'])
+    ...mapActions(['fetchSinglePost', 'addComment']),
+    onSubmitComment () {
+      this.addComment(this.addCommentData).then((res) => {
+        // this.$router.push({ path: `/posts/${this.id}` })
+        console.log(this.fetchSinglePost(this.id))
+        console.log(res)
+      })
+      this.addCommentData = {
+        content: ''
+      }
+    }
   },
   computed: {
     ...mapGetters(['postDetail', 'isLogined'])
@@ -62,11 +84,28 @@ export default {
     text-align: left;
   }
 
+  .post-detail-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
   .post-detail-contents {
     margin-top: 118px;
   }
   .post-detail-date {
     font-size: 20px;
+  }
+
+  .post-detail-edit {
+    font-weight: bold;
+    font-size: 20;
+    color: black;
+
+    a {
+      text-decoration: none;
+      color: black;
+    }
   }
 
   .post-detail-title {
@@ -79,7 +118,7 @@ export default {
     width: 100%;
     height: 540px;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     overflow: hidden;
     margin-top: 39px;
 
