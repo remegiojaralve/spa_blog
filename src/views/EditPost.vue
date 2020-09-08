@@ -5,7 +5,7 @@
       <form enctype="multipart/form-data">
         <div class="create-post-buttons">
           <span @click="onSubmit">Save Post</span>
-          <router-link to="/">Cancel</router-link>
+          <router-link :to="`/posts/${this.editPost.id}`">Cancel</router-link>
         </div>
         <p class="create-post-date"> {{editPost.date | formatDate}} </p>
         <div class="create-post-title">
